@@ -1,0 +1,55 @@
+MIT License
+
+Copyright (c) 2024 Quantitative Finance Platform
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## Additional Terms for Financial Applications
+
+IMPORTANT NOTICE: This software is designed for educational and research purposes. 
+When using this software for financial analysis or trading decisions:
+
+1. EDUCATIONAL PURPOSE: This software is primarily intended for learning quantitative 
+   finance concepts and should not be used as the sole basis for investment decisions.
+
+2. NO FINANCIAL ADVICE: Nothing in this software constitutes financial advice, 
+   investment recommendations, or trading signals.
+
+3. MARKET RISK: All financial trading involves substantial risk of loss. Past 
+   performance does not guarantee future results.
+
+4. DATA ACCURACY: While we strive for accuracy, financial data and calculations 
+   may contain errors. Always verify critical calculations independently.
+
+5. REGULATORY COMPLIANCE: Users are responsible for complying with all applicable 
+   financial regulations in their jurisdiction.
+
+6. THIRD-PARTY DATA: This software may use third-party financial data providers. 
+   Users are responsible for complying with the terms of service of such providers.
+
+BY USING THIS SOFTWARE, YOU ACKNOWLEDGE AND AGREE THAT:
+- You understand the risks involved in financial markets
+- You will not hold the software creators liable for any financial losses
+- You will use this software responsibly and in accordance with applicable laws
+- You understand this is educational software, not professional financial software
+
+For commercial use or financial services applications, please contact the 
+maintainers for appropriate licensing terms.
