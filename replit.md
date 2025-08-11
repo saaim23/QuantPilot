@@ -33,8 +33,11 @@ Preferred communication style: Simple, everyday language.
 - **Real-time Processing**: Streaming data capabilities for live market updates
 
 ### Model Architecture
-- **Option Pricing**: Multiple pricing models with configurable parameters
-- **Risk Management**: VaR calculation, portfolio backtesting, and risk metrics
+- **Traditional Option Pricing**: Black-Scholes, Heston models with Greeks calculation
+- **Exotic Derivatives**: Barrier, Asian, Lookback, Digital, Rainbow options and structured products
+- **Cryptocurrency Models**: Bitcoin/Ethereum derivatives, perpetual futures, DeFi options, NFT derivatives
+- **AI-Enhanced Models**: Quantum optimization, reinforcement learning, transformer prediction, AutoML
+- **Risk Management**: Real-time VaR, dynamic position sizing, market regime detection, stress testing
 - **Feature Engineering**: Comprehensive feature creation for ML models including technical indicators
 - **Backtesting Framework**: Strategy implementation and historical performance analysis
 

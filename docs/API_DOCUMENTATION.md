@@ -2,387 +2,551 @@
 
 ## Overview
 
-This document provides comprehensive documentation for the Quantitative Finance Platform's internal APIs and functions. While the platform primarily runs as a Streamlit web application, the underlying models and functions can be used programmatically.
+The Quantitative Finance Platform provides a comprehensive API for pricing derivatives, managing risk, and implementing advanced AI-enhanced trading strategies. This document details all available modules, classes, and functions.
 
-## Core Models API
+## Core Modules
 
-### Black-Scholes Model
+### Option Pricing Models
 
-#### `BlackScholesModel.option_price(S, K, T, r, sigma, option_type)`
+#### BlackScholesModel
 
-Calculate option price using Black-Scholes formula.
+Classic Black-Scholes option pricing with Greeks calculation.
 
-**Parameters:**
-- `S` (float): Current stock price
-- `K` (float): Strike price  
-- `T` (float): Time to expiration (years)
-- `r` (float): Risk-free rate (decimal)
-- `sigma` (float): Volatility (decimal)
-- `option_type` (str): 'call' or 'put'
-
-**Returns:**
-- `float`: Option price
-
-**Example:**
 ```python
 from models.black_scholes import BlackScholesModel
 
+# Price European option
 price = BlackScholesModel.option_price(
-    S=100,      # Current price
+    S=100,      # Current stock price
     K=105,      # Strike price
-    T=0.25,     # 3 months
-    r=0.05,     # 5% risk-free rate
-    sigma=0.20, # 20% volatility
+    T=0.25,     # Time to expiration (years)
+    r=0.05,     # Risk-free rate
+    sigma=0.20, # Volatility
+    option_type='call'  # 'call' or 'put'
+)
+
+# Calculate Greeks
+greeks = BlackScholesModel.calculate_greeks(S, K, T, r, sigma, option_type)
+# Returns: {'delta': float, 'gamma': float, 'theta': float, 'vega': float, 'rho': float}
+```
+
+#### HestonModel
+
+Advanced stochastic volatility modeling.
+
+```python
+from models.black_scholes import HestonModel
+
+price = HestonModel.option_price_fft(
+    S=100,       # Current stock price
+    K=105,       # Strike price
+    T=0.25,      # Time to expiration
+    r=0.05,      # Risk-free rate
+    v0=0.04,     # Initial volatility
+    kappa=2.0,   # Mean reversion speed
+    theta=0.04,  # Long-term volatility
+    sigma_v=0.3, # Volatility of volatility
+    rho=-0.7,    # Correlation between price and volatility
     option_type='call'
 )
-print(f"Call option price: ${price:.2f}")
 ```
 
-#### `BlackScholesModel.calculate_greeks(S, K, T, r, sigma, option_type)`
+### Exotic Options
 
-Calculate option Greeks (delta, gamma, theta, vega, rho).
+#### ExoticOptionsEngine
 
-**Returns:**
-- `dict`: Dictionary containing all Greeks
+Advanced derivatives pricing for complex option structures.
 
-**Example:**
 ```python
-greeks = BlackScholesModel.calculate_greeks(100, 105, 0.25, 0.05, 0.20, 'call')
-print(f"Delta: {greeks['delta']:.4f}")
-print(f"Gamma: {greeks['gamma']:.4f}")
-```
+from models.exotic_options import ExoticOptionsEngine
 
-### Machine Learning Models
+engine = ExoticOptionsEngine()
 
-#### `MLOptionPricer.train_models(data, target_column, test_size)`
+# Barrier Options
+barrier_result = engine.barrier_option_price(
+    S=100,           # Current price
+    K=105,           # Strike price
+    T=0.25,          # Time to expiration
+    r=0.05,          # Risk-free rate
+    sigma=0.20,      # Volatility
+    barrier=110,     # Barrier level
+    option_type='call',
+    barrier_type='knock_out'
+)
+# Returns: {'price': float, 'greeks': dict, 'probability_touch': float}
 
-Train multiple ML models for option pricing.
-
-**Parameters:**
-- `data` (pd.DataFrame): Training data with features
-- `target_column` (str): Name of target price column
-- `test_size` (float): Test set proportion (0-1)
-
-**Returns:**
-- `dict`: Training results and metrics
-
-**Example:**
-```python
-from models.ml_models import MLOptionPricer
-
-pricer = MLOptionPricer()
-results = pricer.train_models(
-    data=option_data,
-    target_column='option_price',
-    test_size=0.2
+# Asian Options
+asian_result = engine.asian_option_price(
+    S=100, K=105, T=0.25, r=0.05, sigma=0.20,
+    num_observations=252,  # Number of averaging observations
+    option_type='call',
+    avg_type='arithmetic'  # 'arithmetic' or 'geometric'
 )
 
-# View model performance
-for model_name, metrics in results.items():
-    print(f"{model_name}: R² = {metrics['test_metrics']['r2']:.3f}")
+# Rainbow Options (Multi-Asset)
+rainbow_result = engine.rainbow_option_price(
+    S1=100, S2=95,        # Asset prices
+    K=100,                # Strike price
+    T=0.25, r=0.05,
+    sigma1=0.20, sigma2=0.25,  # Individual volatilities
+    correlation=0.3,      # Asset correlation
+    option_type='max'     # 'max', 'min', or 'spread'
+)
 ```
 
-#### `MLOptionPricer.predict(S, K, T, r, sigma, model_name)`
+#### StructuredProducts
 
-Predict option price using trained ML model.
+Complex financial instruments and structured notes.
 
-**Example:**
 ```python
-prediction = pricer.predict(
-    S=100, K=105, T=0.25, r=0.05, sigma=0.20, 
-    model_name='xgboost'
+from models.exotic_options import StructuredProducts
+
+structured = StructuredProducts()
+
+# Autocallable Note
+note_result = structured.autocallable_note(
+    S=100,                    # Current stock price
+    notional=1000,           # Notional amount
+    coupon_rate=0.08,        # Annual coupon rate
+    barrier_level=85,        # Knock-in barrier
+    observation_dates=[0.25, 0.5, 0.75, 1.0],  # Quarterly observations
+    protection_level=0.7     # Capital protection level
 )
+# Returns: {'value': float, 'coupon_pv': float, 'redemption_probability': float}
+```
+
+### Cryptocurrency Derivatives
+
+#### CryptoDerivativesEngine
+
+Specialized pricing for cryptocurrency derivatives.
+
+```python
+from models.crypto_derivatives import CryptoDerivativesEngine
+
+crypto_engine = CryptoDerivativesEngine()
+
+# Crypto Options with Market Adjustments
+crypto_option = crypto_engine.crypto_option_price(
+    S=50000,              # Bitcoin price
+    K=52000,              # Strike price
+    T=0.25,               # Time to expiration
+    r=0.05,               # Risk-free rate
+    sigma=0.80,           # Crypto volatility
+    option_type='call',
+    crypto_adjustments=True  # Apply 24/7 trading and jump risk adjustments
+)
+# Returns: {'price': float, 'adjusted_volatility': float, 'jump_component': float}
+
+# Perpetual Futures
+perp_result = crypto_engine.perpetual_futures_price(
+    S=50000,                 # Spot price
+    funding_rate=0.0001,     # 8-hour funding rate
+    premium_index=0.0        # Premium/discount to spot
+)
+# Returns: {'mark_price': float, 'basis': float, 'funding_payment': float}
+
+# DeFi Options
+defi_option = crypto_engine.defi_option_price(
+    S=100, K=105, T=0.25,
+    protocol_risk=0.05,      # Smart contract risk premium
+    liquidity_premium=0.02,  # Liquidity risk premium
+    gas_cost=50             # Gas cost in USD
+)
+```
+
+### AI-Enhanced Models
+
+#### QuantumInspiredOptimizer
+
+Next-generation portfolio optimization using quantum-inspired algorithms.
+
+```python
+from models.ai_enhanced_models import QuantumInspiredOptimizer
+
+optimizer = QuantumInspiredOptimizer()
+
+# Quantum Portfolio Optimization
+result = optimizer.quantum_portfolio_optimization(
+    returns=returns_dataframe,  # DataFrame of asset returns
+    risk_tolerance=0.5,         # 0 = conservative, 1 = aggressive
+    quantum_iterations=1000     # Number of quantum optimization cycles
+)
+# Returns: {'optimal_weights': array, 'expected_return': float, 'sharpe_ratio': float}
+```
+
+#### ReinforcementLearningTrader
+
+Autonomous trading agent using deep reinforcement learning.
+
+```python
+from models.ai_enhanced_models import ReinforcementLearningTrader
+
+rl_trader = ReinforcementLearningTrader()
+
+# Train Trading Agent
+training_results = rl_trader.train_rl_agent(
+    price_data=stock_data,      # OHLCV DataFrame
+    lookback_window=20,         # Feature window size
+    episodes=1000              # Training episodes
+)
+# Returns: {'average_reward': float, 'win_rate': float, 'q_table_size': int}
+```
+
+#### TransformerPricePredictor
+
+Advanced neural network with attention mechanisms for price prediction.
+
+```python
+from models.ai_enhanced_models import TransformerPricePredictor
+
+transformer = TransformerPricePredictor()
+
+# Create Feature Sequences
+sequences = transformer.create_transformer_features(price_data)
+
+# Run Attention Analysis
+attention_results = transformer.attention_mechanism_simulation(sequences)
+# Returns: {'predictions': list, 'attention_weights': array, 'feature_importance': list}
+```
+
+### Real-Time Risk Management
+
+#### RealTimeRiskEngine
+
+Professional-grade risk monitoring and management system.
+
+```python
+from models.real_time_risk_engine import RealTimeRiskEngine
+
+risk_engine = RealTimeRiskEngine()
+
+# Real-Time Risk Monitoring
+risk_results = risk_engine.real_time_risk_monitor(
+    portfolio={'weights': [0.4, 0.6], 'values': [40000, 60000]},
+    market_data=price_dataframe,
+    confidence_level=0.95
+)
+# Returns comprehensive risk metrics and alerts
+
+# Dynamic Position Sizing
+sizing_result = risk_engine.dynamic_position_sizing(
+    symbol='AAPL',
+    current_volatility=0.25,    # Annualized volatility
+    target_risk=0.02,           # 2% risk target
+    portfolio_value=100000
+)
+# Returns: {'optimal_position_size': float, 'kelly_fraction': float}
 ```
 
 ### Volatility Models
 
-#### `GARCHModel.fit(returns, p, q)`
+#### GARCHModel
 
-Fit GARCH(p,q) model to return series.
+Time-series volatility forecasting using GARCH models.
 
-**Parameters:**
-- `returns` (pd.Series): Return time series
-- `p` (int): GARCH order
-- `q` (int): ARCH order
-
-**Example:**
 ```python
 from models.volatility import GARCHModel
 
 garch = GARCHModel()
-model = garch.fit(returns, p=1, q=1)
-volatility_forecast = garch.forecast(horizon=30)
-```
 
-### Monte Carlo Engine
+# Fit GARCH Model
+garch_results = garch.fit_garch(returns_series, p=1, q=1)
 
-#### `MonteCarloEngine.european_option(S, K, T, r, sigma, option_type, simulations)`
-
-Price European options using Monte Carlo simulation.
-
-**Example:**
-```python
-from models.monte_carlo import MonteCarloEngine
-
-mc = MonteCarloEngine()
-price, confidence_interval = mc.european_option(
-    S=100, K=105, T=0.25, r=0.05, sigma=0.20,
-    option_type='call', simulations=100000
+# Forecast Volatility
+volatility_forecast = garch.forecast_volatility(
+    fitted_model=garch_results['model'],
+    horizon=10  # 10-day forecast
 )
 ```
 
-## Data Providers API
+#### ImpliedVolatilitySurface
 
-### Market Data Provider
+3D implied volatility surface construction and analysis.
 
-#### `MarketDataProvider.get_stock_data(symbol, period, interval)`
+```python
+from models.volatility import ImpliedVolatilitySurface
 
-Fetch historical stock data.
+iv_surface = ImpliedVolatilitySurface()
 
-**Example:**
+# Build Volatility Surface
+surface_data = iv_surface.build_surface(
+    option_chain_data,     # Options market data
+    risk_free_rate=0.05,
+    dividend_yield=0.02
+)
+
+# Interpolate Volatility
+interpolated_vol = iv_surface.interpolate_volatility(
+    strike=105, 
+    time_to_expiry=0.25,
+    surface_data=surface_data
+)
+```
+
+### Monte Carlo Simulations
+
+#### MonteCarloEngine
+
+High-performance Monte Carlo pricing engine.
+
+```python
+from models.monte_carlo import MonteCarloEngine
+
+mc_engine = MonteCarloEngine(n_simulations=100000)
+
+# Generate Price Paths
+price_paths = mc_engine.geometric_brownian_motion(
+    S0=100,      # Initial price
+    r=0.05,      # Risk-free rate
+    sigma=0.20,  # Volatility
+    T=1.0        # Time horizon
+)
+
+# Price European Option
+option_result = mc_engine.price_european_option(
+    price_paths, K=105, r=0.05, T=1.0, option_type='call'
+)
+
+# Calculate VaR
+var_result = mc_engine.calculate_var(
+    portfolio_returns,
+    confidence_level=0.95,
+    time_horizon=1
+)
+```
+
+### Market Data Providers
+
+#### MarketDataProvider
+
+Real-time and historical market data integration.
+
 ```python
 from data.market_data import MarketDataProvider
 
-provider = MarketDataProvider()
-data = provider.get_stock_data('AAPL', period='1y', interval='1d')
+data_provider = MarketDataProvider()
+
+# Get Stock Data
+stock_data = data_provider.get_stock_data(
+    symbol='AAPL',
+    period='1y',      # '1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max'
+    interval='1d'     # '1m', '2m', '5m', '15m', '30m', '60m', '90m', '1h', '1d', '5d', '1wk', '1mo', '3mo'
+)
+
+# Get Option Chain
+option_chain = data_provider.get_option_chain('AAPL', '2024-03-15')
+
+# Get Real-Time Quote
+quote = data_provider.get_real_time_quote('AAPL')
+# Returns: {'symbol': str, 'price': float, 'change': float, 'volume': int}
 ```
 
-#### `MarketDataProvider.get_options_chain(symbol, expiration_date)`
+#### AlternativeDataAggregator
 
-Get options chain for specific expiration.
+Integration with satellite imagery, ESG, and alternative data sources.
 
-**Example:**
 ```python
-options_chain = provider.get_options_chain('AAPL', '2024-03-15')
+from data.alternative_data import AlternativeDataAggregator
+
+alt_data = AlternativeDataAggregator()
+
+# ESG Scores
+esg_data = alt_data.get_esg_scores(['AAPL', 'GOOGL', 'MSFT'])
+
+# Satellite Economic Indicators
+satellite_data = alt_data.get_satellite_indicators(
+    companies=['AAPL', 'TSLA'],
+    indicator_type='parking_lots'  # Economic activity proxy
+)
 ```
 
-### Alternative Data
+### Backtesting Framework
 
-#### `SentimentAnalyzer.analyze_news(symbol, days_back)`
+#### OptionTradingStrategy
 
-Analyze news sentiment for a stock.
+Comprehensive strategy backtesting with multiple option strategies.
 
-**Example:**
-```python
-from data.sentiment_analysis import SentimentAnalyzer
-
-analyzer = SentimentAnalyzer()
-sentiment = analyzer.analyze_news('AAPL', days_back=30)
-print(f"Average sentiment: {sentiment['average_score']:.2f}")
-```
-
-## Visualization API
-
-### Financial Charts
-
-#### `FinancialCharts.candlestick_chart(data, title)`
-
-Create candlestick chart.
-
-**Example:**
-```python
-from visualization.charts import FinancialCharts
-
-charts = FinancialCharts()
-fig = charts.candlestick_chart(stock_data, "AAPL Price History")
-fig.show()
-```
-
-### Volatility Surface
-
-#### `VolatilitySurfaceVisualizer.create_3d_surface(surface_data)`
-
-Create 3D implied volatility surface.
-
-**Example:**
-```python
-from visualization.volatility_surface import VolatilitySurfaceVisualizer
-
-visualizer = VolatilitySurfaceVisualizer()
-fig = visualizer.create_3d_surface(iv_surface_data)
-```
-
-## Backtesting API
-
-### Strategy Engine
-
-#### `OptionTradingStrategy.long_call_strategy(S, K, T, r, sigma, position_size)`
-
-Define long call strategy.
-
-**Example:**
 ```python
 from backtesting.strategy import OptionTradingStrategy
 
 strategy = OptionTradingStrategy()
-position = strategy.long_call_strategy(
-    S=100, K=105, T=0.25, r=0.05, sigma=0.20, position_size=10
+
+# Backtest Covered Call Strategy
+backtest_results = strategy.backtest_covered_call(
+    stock_data=price_data,
+    strike_selection='otm_5',    # 5% out-of-the-money
+    expiration_days=30,          # 30-day expiration
+    initial_capital=100000
 )
-print(f"Max profit: ${position['max_profit']}")
-```
 
-#### `PortfolioBacktester.run_backtest(universe_data, strategy_config, start_date, end_date)`
-
-Run comprehensive portfolio backtest.
-
-**Example:**
-```python
-from backtesting.strategy import PortfolioBacktester
-
-backtester = PortfolioBacktester()
-results = backtester.run_backtest(
-    universe_data={'AAPL': aapl_data},
-    strategy_config={
-        'initial_capital': 100000,
-        'position_size_pct': 0.1,
-        'strategy_type': 'covered_call'
-    },
-    start_date='2023-01-01',
-    end_date='2023-12-31'
+# Backtest Iron Condor
+condor_results = strategy.backtest_iron_condor(
+    stock_data=price_data,
+    width=10,                    # Strike width
+    expiration_days=45,
+    initial_capital=100000
 )
 ```
 
-## Utility Functions API
+### Risk Metrics and Calculations
 
-### Financial Calculations
+#### RiskMetrics
 
-#### `FinancialCalculations.calculate_returns(prices, method)`
+Comprehensive risk calculation utilities.
 
-Calculate returns from price series.
-
-**Parameters:**
-- `method` (str): 'simple' or 'log'
-
-**Example:**
-```python
-from utils.calculations import FinancialCalculations
-
-returns = FinancialCalculations.calculate_returns(price_series, method='log')
-```
-
-#### `RiskMetrics.calculate_var(returns, confidence_level, method)`
-
-Calculate Value at Risk.
-
-**Example:**
 ```python
 from utils.calculations import RiskMetrics
 
-var_95 = RiskMetrics.calculate_var(returns, confidence_level=0.95, method='historical')
-```
+risk_metrics = RiskMetrics()
 
-## Configuration API
+# Portfolio VaR
+portfolio_var = risk_metrics.portfolio_var(
+    weights=portfolio_weights,
+    returns_matrix=returns_data,
+    confidence_level=0.95
+)
 
-### Settings
+# Maximum Drawdown
+max_dd = risk_metrics.maximum_drawdown(portfolio_returns)
 
-Access configuration parameters:
+# Sharpe Ratio
+sharpe = risk_metrics.sharpe_ratio(
+    returns=portfolio_returns,
+    risk_free_rate=0.02
+)
 
-```python
-from config.settings import RISK_FREE_RATE, MONTE_CARLO_SIMULATIONS
-
-print(f"Default risk-free rate: {RISK_FREE_RATE}")
-print(f"Default MC simulations: {MONTE_CARLO_SIMULATIONS}")
+# Greeks Portfolio
+portfolio_greeks = risk_metrics.portfolio_greeks(
+    positions=option_positions,
+    market_data=current_prices
+)
 ```
 
 ## Error Handling
 
-All API functions include comprehensive error handling:
+All API functions include comprehensive error handling with informative error messages:
 
 ```python
 try:
-    price = BlackScholesModel.option_price(100, 105, 0.25, 0.05, 0.20, 'call')
+    result = BlackScholesModel.option_price(S=100, K=105, T=0.25, r=0.05, sigma=0.20)
 except ValueError as e:
-    print(f"Invalid parameters: {e}")
+    print(f"Invalid parameter: {e}")
 except Exception as e:
     print(f"Calculation error: {e}")
 ```
 
 ## Performance Considerations
 
+### Caching
+
+The platform uses Streamlit's caching system for improved performance:
+
+```python
+@st.cache_resource
+def get_market_data_provider():
+    return MarketDataProvider()
+
+@st.cache_data
+def calculate_option_prices(S, K, T, r, sigma):
+    return BlackScholesModel.option_price(S, K, T, r, sigma)
+```
+
 ### Optimization Tips
 
-1. **Batch Processing**: Use vectorized operations when possible
-2. **Caching**: Results are cached for repeated calculations
-3. **Memory Management**: Large datasets are processed in chunks
-4. **Parallel Processing**: Monte Carlo simulations use multiprocessing
+1. **Batch Operations**: Use vectorized NumPy operations for multiple calculations
+2. **Data Caching**: Cache market data to avoid repeated API calls
+3. **Parameter Validation**: Validate inputs before expensive calculations
+4. **Memory Management**: Use generators for large Monte Carlo simulations
 
-### Memory Usage
+## Configuration
 
-```python
-import psutil
-import gc
-
-# Monitor memory usage
-process = psutil.Process()
-print(f"Memory usage: {process.memory_info().rss / 1024 / 1024:.2f} MB")
-
-# Clean up after large calculations
-gc.collect()
-```
-
-## Testing
-
-### Unit Tests
-
-Run tests for specific modules:
+### Environment Variables
 
 ```bash
-# Test option pricing models
-python -m pytest tests/test_black_scholes.py -v
+# Optional API keys for enhanced functionality
+ALPHA_VANTAGE_API_KEY=your_key_here
+TWITTER_BEARER_TOKEN=your_token_here
 
-# Test machine learning models
-python -m pytest tests/test_ml_models.py -v
-
-# Test all modules
-python -m pytest tests/ -v
+# Risk management parameters
+DEFAULT_RISK_FREE_RATE=0.05
+MONTE_CARLO_SIMULATIONS=100000
+MAX_VAR_CONFIDENCE=0.99
 ```
 
-### Performance Tests
+### Settings Configuration
 
 ```python
-import time
-from models.black_scholes import BlackScholesModel
-
-# Benchmark option pricing
-start_time = time.time()
-for i in range(10000):
-    price = BlackScholesModel.option_price(100, 105, 0.25, 0.05, 0.20, 'call')
-end_time = time.time()
-
-print(f"10,000 calculations took {end_time - start_time:.2f} seconds")
+# config/settings.py
+RISK_FREE_RATE = 0.05
+MONTE_CARLO_SIMULATIONS = 100000
+DEFAULT_VOLATILITY = 0.20
+CACHE_TIMEOUT = 3600  # 1 hour
 ```
 
-## Contributing to the API
+## Integration Examples
 
-When adding new API functions:
-
-1. **Documentation**: Include comprehensive docstrings
-2. **Type Hints**: Use proper type annotations
-3. **Error Handling**: Implement robust error checking
-4. **Tests**: Write unit tests for new functions
-5. **Examples**: Provide usage examples
-
-### Template for New Functions
+### Complete Option Pricing Workflow
 
 ```python
-def new_function(param1: float, param2: str = 'default') -> dict:
-    """
-    Brief description of the function.
-    
-    Args:
-        param1: Description of param1
-        param2: Description of param2 (default: 'default')
-    
-    Returns:
-        Dictionary containing results
-        
-    Raises:
-        ValueError: If parameters are invalid
-        
-    Example:
-        >>> result = new_function(100.0, 'test')
-        >>> print(result['value'])
-    """
-    # Implementation here
-    pass
+# 1. Get market data
+data_provider = MarketDataProvider()
+stock_data = data_provider.get_stock_data('AAPL', '1y')
+
+# 2. Calculate implied volatility
+current_price = stock_data['Close'].iloc[-1]
+historical_vol = stock_data['Close'].pct_change().std() * np.sqrt(252)
+
+# 3. Price options
+bs_price = BlackScholesModel.option_price(
+    S=current_price, K=current_price*1.05, T=0.25, 
+    r=0.05, sigma=historical_vol, option_type='call'
+)
+
+# 4. Compare with exotic options
+exotic_engine = ExoticOptionsEngine()
+barrier_price = exotic_engine.barrier_option_price(
+    S=current_price, K=current_price*1.05, T=0.25,
+    r=0.05, sigma=historical_vol, barrier=current_price*1.10,
+    option_type='call', barrier_type='knock_out'
+)
+
+# 5. Risk analysis
+risk_engine = RealTimeRiskEngine()
+portfolio = {'weights': [1.0], 'values': [bs_price]}
+risk_metrics = risk_engine.real_time_risk_monitor(portfolio, stock_data)
 ```
+
+### AI-Enhanced Trading Strategy
+
+```python
+# 1. Prepare data
+transformer = TransformerPricePredictor()
+features = transformer.create_transformer_features(stock_data)
+
+# 2. Train RL agent
+rl_trader = ReinforcementLearningTrader()
+training_results = rl_trader.train_rl_agent(stock_data, episodes=1000)
+
+# 3. Optimize portfolio
+optimizer = QuantumInspiredOptimizer()
+returns_df = stock_data[['AAPL', 'GOOGL', 'MSFT']].pct_change().dropna()
+optimal_weights = optimizer.quantum_portfolio_optimization(returns_df)
+
+# 4. Monitor risk
+risk_results = risk_engine.real_time_risk_monitor(
+    portfolio=optimal_weights, 
+    market_data=stock_data
+)
+```
+
+## Support and Documentation
+
+- **GitHub Issues**: Report bugs and request features
+- **API Reference**: Complete function documentation with examples
+- **Examples**: Sample implementations in `/examples` directory
+- **Research Papers**: Academic foundation in `/docs` directory
+
+---
+
+**Note**: This API is designed for educational and research purposes. For production trading, ensure proper risk management and regulatory compliance.
