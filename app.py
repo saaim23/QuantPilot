@@ -14,6 +14,10 @@ from models.black_scholes import BlackScholesModel, HestonModel
 from models.volatility import GARCHModel, ImpliedVolatilitySurface, VolatilityModels
 from models.monte_carlo import MonteCarloEngine, PathDependentOptions, VaRCalculator
 from models.ml_models import MLOptionPricer, PhysicsInformedNeuralNetwork, FeatureEngineering
+from models.exotic_options import ExoticOptionsEngine, StructuredProducts
+from models.crypto_derivatives import CryptoDerivativesEngine, NFTDerivatives
+from models.ai_enhanced_models import QuantumInspiredOptimizer, ReinforcementLearningTrader, TransformerPricePredictor, AutoMLFinancialModels
+from models.real_time_risk_engine import RealTimeRiskEngine
 from data.market_data import MarketDataProvider, RealTimeDataProvider, SyntheticDataGenerator, MarketIndicators
 from data.alternative_data import AlternativeDataAggregator, SatelliteDataProvider, ESGDataProvider
 from data.sentiment_analysis import SentimentAnalyzer, NewsDataProvider
@@ -78,10 +82,14 @@ def main():
             "🌊 Volatility Analysis",
             "🎲 Monte Carlo Simulations",
             "🤖 Machine Learning Models",
+            "🧪 Exotic Options Lab",
+            "₿ Crypto Derivatives",
+            "🔮 AI-Enhanced Models",
             "🛰️ Alternative Data Analysis",
             "📰 Sentiment Analysis",
             "📊 Portfolio Backtesting",
-            "🎯 Risk Management",
+            "🎯 Real-Time Risk Engine",
+            "⚡ Quantum Portfolio Optimizer",
             "📋 Model Comparison"
         ]
     )
@@ -97,14 +105,22 @@ def main():
         monte_carlo_page()
     elif selected_page == "🤖 Machine Learning Models":
         ml_models_page()
+    elif selected_page == "🧪 Exotic Options Lab":
+        exotic_options_page()
+    elif selected_page == "₿ Crypto Derivatives":
+        crypto_derivatives_page()
+    elif selected_page == "🔮 AI-Enhanced Models":
+        ai_enhanced_models_page()
     elif selected_page == "🛰️ Alternative Data Analysis":
         alternative_data_page()
     elif selected_page == "📰 Sentiment Analysis":
         sentiment_analysis_page()
     elif selected_page == "📊 Portfolio Backtesting":
         backtesting_page()
-    elif selected_page == "🎯 Risk Management":
-        risk_management_page()
+    elif selected_page == "🎯 Real-Time Risk Engine":
+        real_time_risk_page()
+    elif selected_page == "⚡ Quantum Portfolio Optimizer":
+        quantum_optimizer_page()
     elif selected_page == "📋 Model Comparison":
         model_comparison_page()
 
@@ -2683,6 +2699,533 @@ try:
     from backtesting.strategy import OptionTradingStrategy, PortfolioBacktester
 except ImportError as e:
     st.error(f"Missing module: {e}. Some features may not be available.")
+
+# Advanced Features Pages
+
+def exotic_options_page():
+    """Exotic options laboratory"""
+    st.markdown('<h2 class="section-header">🧪 Exotic Options Laboratory</h2>', unsafe_allow_html=True)
+    
+    exotic_engine = ExoticOptionsEngine()
+    structured_products = StructuredProducts()
+    
+    st.sidebar.markdown("### 🎯 Exotic Option Settings")
+    option_type = st.sidebar.selectbox(
+        "Exotic Option Type",
+        ["Barrier Options", "Asian Options", "Lookback Options", "Digital Options", "Rainbow Options", "Structured Products"]
+    )
+    
+    # Common parameters
+    S = st.sidebar.number_input("Current Price ($)", value=100.0, min_value=1.0)
+    K = st.sidebar.number_input("Strike Price ($)", value=105.0, min_value=1.0)
+    T = st.sidebar.number_input("Time to Expiration (years)", value=0.25, min_value=0.01, max_value=5.0)
+    r = st.sidebar.number_input("Risk-free Rate", value=0.05, min_value=0.0, max_value=1.0)
+    sigma = st.sidebar.number_input("Volatility", value=0.20, min_value=0.01, max_value=2.0)
+    
+    if option_type == "Barrier Options":
+        st.subheader("🚧 Barrier Options")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            barrier = st.number_input("Barrier Level ($)", value=110.0, min_value=1.0)
+            barrier_type = st.selectbox("Barrier Type", ["knock_out", "knock_in", "up_and_out", "down_and_out"])
+            call_put = st.selectbox("Option Type", ["call", "put"])
+        
+        if st.button("Calculate Barrier Option"):
+            result = exotic_engine.barrier_option_price(S, K, T, r, sigma, barrier, call_put, barrier_type)
+            
+            with col2:
+                st.metric("Option Price", f"${result['price']:.2f}")
+                st.metric("Barrier Touch Probability", f"{result.get('probability_touch', 0):.1%}")
+                
+                if 'greeks' in result:
+                    st.write("**Greeks:**")
+                    for greek, value in result['greeks'].items():
+                        st.write(f"- {greek.title()}: {value:.4f}")
+    
+    elif option_type == "Asian Options":
+        st.subheader("🌏 Asian Options (Average Price)")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            avg_type = st.selectbox("Average Type", ["arithmetic", "geometric"])
+            num_obs = st.number_input("Observations", value=252, min_value=10, max_value=1000)
+            call_put = st.selectbox("Option Type", ["call", "put"])
+        
+        if st.button("Calculate Asian Option"):
+            result = exotic_engine.asian_option_price(S, K, T, r, sigma, num_obs, call_put, avg_type)
+            
+            with col2:
+                st.metric("Option Price", f"${result['price']:.2f}")
+                st.write(f"**Averaging:** {result['type']}")
+                st.write(f"**Observations:** {result['averaging_observations']}")
+    
+    elif option_type == "Rainbow Options":
+        st.subheader("🌈 Rainbow Options (Multi-Asset)")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            S2 = st.number_input("Asset 2 Price ($)", value=95.0, min_value=1.0)
+            sigma2 = st.number_input("Asset 2 Volatility", value=0.25, min_value=0.01, max_value=2.0)
+            correlation = st.slider("Correlation", -1.0, 1.0, 0.3)
+            rainbow_type = st.selectbox("Rainbow Type", ["max", "min", "spread"])
+        
+        if st.button("Calculate Rainbow Option"):
+            result = exotic_engine.rainbow_option_price(S, S2, K, T, r, sigma, sigma2, correlation, rainbow_type)
+            
+            with col2:
+                st.metric("Option Price", f"${result['price']:.2f}")
+                st.metric("Correlation Used", f"{result['correlation']:.2f}")
+                st.write(f"**Type:** {result['type']}")
+    
+    elif option_type == "Structured Products":
+        st.subheader("🏗️ Structured Products")
+        
+        product_type = st.selectbox("Product Type", ["Autocallable Note", "Reverse Convertible Note"])
+        
+        if product_type == "Autocallable Note":
+            col1, col2 = st.columns(2)
+            with col1:
+                notional = st.number_input("Notional ($)", value=1000.0, min_value=100.0)
+                coupon_rate = st.number_input("Coupon Rate", value=0.08, min_value=0.0, max_value=1.0)
+                barrier_level = st.number_input("Barrier Level ($)", value=85.0, min_value=1.0)
+                
+                obs_dates = [0.25, 0.5, 0.75, 1.0]  # Quarterly observations
+                
+            if st.button("Price Autocallable Note"):
+                result = structured_products.autocallable_note(S, notional, coupon_rate, barrier_level, obs_dates)
+                
+                with col2:
+                    st.metric("Note Value", f"${result['value']:.2f}")
+                    st.metric("Coupon PV", f"${result['coupon_pv']:.2f}")
+                    st.metric("Redemption Probability", f"{result['redemption_probability']:.1%}")
+                    st.metric("Yield to Call", f"{result['yield_to_call']:.1%}")
+
+def crypto_derivatives_page():
+    """Cryptocurrency derivatives trading"""
+    st.markdown('<h2 class="section-header">₿ Cryptocurrency Derivatives</h2>', unsafe_allow_html=True)
+    
+    crypto_engine = CryptoDerivativesEngine()
+    nft_derivatives = NFTDerivatives()
+    
+    st.sidebar.markdown("### 🎯 Crypto Settings")
+    derivative_type = st.sidebar.selectbox(
+        "Derivative Type",
+        ["Crypto Options", "Perpetual Futures", "DeFi Options", "Yield Farming Strategy", "NFT Floor Options"]
+    )
+    
+    if derivative_type == "Crypto Options":
+        st.subheader("₿ Cryptocurrency Options")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            crypto_symbol = st.selectbox("Cryptocurrency", ["BTC", "ETH", "ADA", "SOL", "MATIC"])
+            
+            # Get crypto data
+            crypto_data = crypto_engine.get_crypto_data(crypto_symbol, "1y")
+            
+            if not crypto_data.empty:
+                current_price = crypto_data['Close'].iloc[-1]
+                current_vol = crypto_data['Volatility_30d'].iloc[-1] if 'Volatility_30d' in crypto_data.columns else 0.8
+                
+                st.write(f"**Current {crypto_symbol} Price:** ${current_price:,.2f}")
+                st.write(f"**30-day Volatility:** {current_vol:.1%}")
+                
+                K = st.number_input("Strike Price ($)", value=float(current_price * 1.05), min_value=1.0)
+                T = st.number_input("Time to Expiration (years)", value=0.25, min_value=0.01, max_value=2.0)
+                option_type = st.selectbox("Option Type", ["call", "put"])
+                crypto_adjustments = st.checkbox("Apply Crypto Market Adjustments", value=True)
+        
+        if st.button("Calculate Crypto Option") and not crypto_data.empty:
+            result = crypto_engine.crypto_option_price(
+                current_price, K, T, 0.05, current_vol, option_type, crypto_adjustments
+            )
+            
+            with col2:
+                st.metric("Option Price", f"${result['price']:.2f}")
+                if crypto_adjustments:
+                    st.metric("Adjusted Volatility", f"{result['adjusted_volatility']:.1%}")
+                    st.metric("Jump Component", f"${result.get('jump_component', 0):.2f}")
+                    st.metric("Sentiment Impact", f"${result.get('sentiment_impact', 0):.2f}")
+                
+                st.write("**Greeks:**")
+                for greek, value in result.get('greeks', {}).items():
+                    st.write(f"- {greek.title()}: {value:.4f}")
+    
+    elif derivative_type == "Perpetual Futures":
+        st.subheader("⚡ Perpetual Futures")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            crypto_symbol = st.selectbox("Cryptocurrency", ["BTC", "ETH", "ADA", "SOL"])
+            crypto_data = crypto_engine.get_crypto_data(crypto_symbol, "1y")
+            
+            if not crypto_data.empty:
+                current_price = crypto_data['Close'].iloc[-1]
+                st.write(f"**Spot Price:** ${current_price:,.2f}")
+                
+                funding_rate = st.number_input("8h Funding Rate (%)", value=0.01, min_value=-0.5, max_value=0.5) / 100
+                premium_index = st.number_input("Premium/Discount (%)", value=0.0, min_value=-5.0, max_value=5.0) / 100
+        
+        if st.button("Calculate Perpetual Futures") and not crypto_data.empty:
+            result = crypto_engine.perpetual_futures_price(current_price, funding_rate, premium_index)
+            
+            with col2:
+                st.metric("Mark Price", f"${result['mark_price']:,.2f}")
+                st.metric("Basis", f"${result['basis']:,.2f}")
+                st.metric("Annualized Basis", f"{result['annualized_basis']:.1%}")
+                st.metric("Funding Payment", f"${result['funding_payment']:,.2f}")
+                st.metric("Time to Funding", f"{result['time_to_funding']:.1f} hours")
+
+def ai_enhanced_models_page():
+    """AI-Enhanced financial models"""
+    st.markdown('<h2 class="section-header">🔮 AI-Enhanced Financial Models</h2>', unsafe_allow_html=True)
+    
+    st.sidebar.markdown("### 🎯 AI Model Settings")
+    ai_model_type = st.sidebar.selectbox(
+        "AI Model Type",
+        ["Reinforcement Learning Trader", "Transformer Price Predictor", "AutoML Model Selection"]
+    )
+    
+    if ai_model_type == "Reinforcement Learning Trader":
+        st.subheader("🤖 Reinforcement Learning Trading Agent")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            symbol = st.selectbox("Stock Symbol", ["AAPL", "GOOGL", "MSFT", "TSLA", "SPY"])
+            training_episodes = st.number_input("Training Episodes", value=500, min_value=100, max_value=2000)
+            lookback_window = st.number_input("Lookback Window", value=20, min_value=5, max_value=60)
+            
+            # Get market data
+            market_provider = MarketDataProvider()
+            data = market_provider.get_stock_data(symbol, period='2y', interval='1d')
+        
+        if st.button("Train RL Agent") and not data.empty:
+            rl_trader = ReinforcementLearningTrader()
+            
+            with st.spinner("Training reinforcement learning agent..."):
+                results = rl_trader.train_rl_agent(data, lookback_window, training_episodes)
+            
+            with col2:
+                if 'error' not in results:
+                    st.metric("Training Episodes", results['trained_episodes'])
+                    st.metric("Average Reward", f"{results['average_reward']:.2f}")
+                    st.metric("Win Rate", f"{results['win_rate']:.1%}")
+                    st.metric("Q-table Size", results['q_table_size'])
+                    st.metric("Convergence Score", f"{results.get('convergence_score', 0):.3f}")
+                    
+                    # Plot training progress
+                    if 'episode_rewards' in results:
+                        rewards_df = pd.DataFrame({
+                            'Episode': range(len(results['episode_rewards'])),
+                            'Reward': results['episode_rewards']
+                        })
+                        
+                        fig = px.line(rewards_df, x='Episode', y='Reward', 
+                                    title="RL Training Progress")
+                        st.plotly_chart(fig, use_container_width=True)
+    
+    elif ai_model_type == "Transformer Price Predictor":
+        st.subheader("🧠 Transformer-Based Price Prediction")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            symbol = st.selectbox("Stock Symbol", ["AAPL", "GOOGL", "MSFT", "TSLA", "SPY"])
+            sequence_length = st.number_input("Sequence Length", value=60, min_value=20, max_value=120)
+            
+            # Get market data
+            market_provider = MarketDataProvider()
+            data = market_provider.get_stock_data(symbol, period='2y', interval='1d')
+        
+        if st.button("Run Transformer Analysis") and not data.empty:
+            transformer = TransformerPricePredictor()
+            
+            with st.spinner("Creating transformer features and running attention analysis..."):
+                sequences = transformer.create_transformer_features(data)
+                
+                if len(sequences) > 0:
+                    attention_results = transformer.attention_mechanism_simulation(sequences)
+            
+            with col2:
+                if len(sequences) > 0 and 'error' not in attention_results:
+                    st.metric("Sequences Generated", len(sequences))
+                    st.metric("Feature Dimensions", sequences.shape[2] if len(sequences.shape) > 2 else 0)
+                    st.metric("Predictions Made", len(attention_results.get('predictions', [])))
+                    
+                    # Feature importance
+                    if 'feature_importance' in attention_results:
+                        importance_df = pd.DataFrame({
+                            'Feature': ['Returns', 'High_Change', 'Low_Change', 'Volume_Ratio', 
+                                      'RSI', 'MACD', 'BB_Position', 'Volatility', 'Skewness', 'Kurtosis'],
+                            'Importance': attention_results['feature_importance']
+                        })
+                        
+                        fig = px.bar(importance_df, x='Feature', y='Importance', 
+                                   title="Transformer Feature Importance")
+                        fig.update_xaxis(tickangle=45)
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Temporal attention weights
+                    if 'temporal_importance' in attention_results:
+                        temporal_df = pd.DataFrame({
+                            'Time_Step': range(len(attention_results['temporal_importance'])),
+                            'Attention_Weight': attention_results['temporal_importance']
+                        })
+                        
+                        fig = px.line(temporal_df, x='Time_Step', y='Attention_Weight',
+                                    title="Temporal Attention Weights")
+                        st.plotly_chart(fig, use_container_width=True)
+
+def real_time_risk_page():
+    """Real-time risk management dashboard"""
+    st.markdown('<h2 class="section-header">🎯 Real-Time Risk Management Engine</h2>', unsafe_allow_html=True)
+    
+    risk_engine = RealTimeRiskEngine()
+    
+    st.sidebar.markdown("### 🎯 Risk Settings")
+    
+    # Portfolio simulation inputs
+    symbols = st.sidebar.multiselect(
+        "Portfolio Symbols",
+        ["AAPL", "GOOGL", "MSFT", "TSLA", "SPY", "NVDA", "META"],
+        default=["AAPL", "SPY"]
+    )
+    
+    portfolio_value = st.sidebar.number_input("Portfolio Value ($)", value=100000, min_value=1000)
+    confidence_level = st.sidebar.slider("VaR Confidence Level", 0.90, 0.99, 0.95)
+    
+    if symbols:
+        # Create portfolio weights (equal weight for simplicity)
+        weights = [1.0 / len(symbols)] * len(symbols)
+        values = [portfolio_value * w for w in weights]
+        
+        portfolio = {
+            'symbols': symbols,
+            'weights': weights,
+            'values': values
+        }
+        
+        # Get market data for risk analysis
+        market_provider = MarketDataProvider()
+        
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            st.subheader("📊 Risk Dashboard")
+            
+            # Use first symbol's data for demonstration
+            market_data = market_provider.get_stock_data(symbols[0], period='1y', interval='1d')
+            
+            if not market_data.empty:
+                # Real-time risk monitoring
+                risk_results = risk_engine.real_time_risk_monitor(
+                    portfolio, market_data, confidence_level
+                )
+                
+                # Risk metrics display
+                metric_cols = st.columns(4)
+                
+                with metric_cols[0]:
+                    st.metric("Portfolio VaR (1d)", f"${risk_results['var_1d']:,.0f}")
+                    st.metric("VaR Percentage", f"{risk_results['var_percentage']:.2f}%")
+                
+                with metric_cols[1]:
+                    st.metric("Portfolio VaR (10d)", f"${risk_results['var_10d']:,.0f}")
+                    st.metric("Overall Risk Score", f"{risk_results['overall_risk_score']:.0f}/100")
+                
+                with metric_cols[2]:
+                    st.metric("Liquidity Score", f"{risk_results['liquidity_score']:.1f}")
+                    st.metric("Concentration Score", f"{risk_results['concentration_score']:.1f}")
+                
+                with metric_cols[3]:
+                    st.metric("Market Regime", risk_results['market_regime']['regime'])
+                    st.metric("Regime Confidence", f"{risk_results['market_regime']['confidence']:.1%}")
+                
+                # Risk alerts
+                if risk_results['risk_alerts']:
+                    st.subheader("🚨 Risk Alerts")
+                    for alert in risk_results['risk_alerts']:
+                        if alert['severity'] == 'CRITICAL':
+                            st.error(f"**{alert['type']}**: {alert['message']}")
+                        elif alert['severity'] == 'WARNING':
+                            st.warning(f"**{alert['type']}**: {alert['message']}")
+                        else:
+                            st.info(f"**{alert['type']}**: {alert['message']}")
+                
+                # Stress test results
+                st.subheader("🧪 Stress Test Results")
+                stress_data = []
+                for scenario, result in risk_results['stress_test_results'].items():
+                    stress_data.append({
+                        'Scenario': scenario.replace('_', ' ').title(),
+                        'Loss ($)': result['loss'],
+                        'Loss (%)': result['loss_percentage'],
+                        'New Portfolio Value ($)': result['new_portfolio_value']
+                    })
+                
+                stress_df = pd.DataFrame(stress_data)
+                st.dataframe(stress_df, use_container_width=True)
+                
+                # Stress test visualization
+                fig = px.bar(stress_df, x='Scenario', y='Loss (%)', 
+                           title="Stress Test Loss Scenarios",
+                           color='Loss (%)', color_continuous_scale='Reds')
+                st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            # Hedge recommendations
+            st.subheader("💡 Hedge Recommendations")
+            
+            for rec in risk_results['hedge_recommendations']:
+                priority_color = {
+                    'CRITICAL': '🔴',
+                    'HIGH': '🟠', 
+                    'MEDIUM': '🟡',
+                    'LOW': '🟢'
+                }.get(rec['priority'], '⚪')
+                
+                st.write(f"{priority_color} **{rec['type']}**")
+                st.write(f"Action: {rec['action']}")
+                st.write(f"Rationale: {rec['rationale']}")
+                st.write(f"Allocation: {rec['allocation']:.1%}")
+                st.write("---")
+            
+            # Dynamic position sizing
+            st.subheader("📏 Dynamic Position Sizing")
+            
+            symbol_for_sizing = st.selectbox("Symbol for Position Sizing", symbols)
+            target_risk = st.slider("Target Risk (%)", 1.0, 5.0, 2.0) / 100
+            
+            if symbol_for_sizing:
+                # Get current volatility
+                symbol_data = market_provider.get_stock_data(symbol_for_sizing, period='3m', interval='1d')
+                if not symbol_data.empty:
+                    current_vol = symbol_data['Close'].pct_change().std() * np.sqrt(252)
+                    
+                    sizing_result = risk_engine.dynamic_position_sizing(
+                        symbol_for_sizing, current_vol, target_risk, portfolio_value
+                    )
+                    
+                    st.metric("Optimal Position Size", f"${sizing_result['optimal_position_size']:,.0f}")
+                    st.metric("Position %", f"{sizing_result['position_percentage']:.1f}%")
+                    st.metric("Kelly Fraction", f"{sizing_result['kelly_fraction']:.3f}")
+                    st.write(f"**Recommendation:** {sizing_result['recommendation']}")
+
+def quantum_optimizer_page():
+    """Quantum-inspired portfolio optimization"""
+    st.markdown('<h2 class="section-header">⚡ Quantum-Inspired Portfolio Optimizer</h2>', unsafe_allow_html=True)
+    
+    quantum_optimizer = QuantumInspiredOptimizer()
+    
+    st.sidebar.markdown("### 🎯 Quantum Settings")
+    
+    # Portfolio universe
+    universe_symbols = st.sidebar.multiselect(
+        "Investment Universe",
+        ["AAPL", "GOOGL", "MSFT", "TSLA", "NVDA", "META", "AMZN", "SPY", "QQQ", "VTI"],
+        default=["AAPL", "GOOGL", "MSFT", "SPY"]
+    )
+    
+    risk_tolerance = st.sidebar.slider("Risk Tolerance", 0.0, 1.0, 0.5, 0.1)
+    quantum_iterations = st.sidebar.number_input("Quantum Iterations", value=1000, min_value=100, max_value=5000)
+    
+    if universe_symbols and len(universe_symbols) >= 2:
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            st.subheader("🌌 Quantum Portfolio Optimization")
+            
+            # Get return data for optimization
+            market_provider = MarketDataProvider()
+            returns_data = {}
+            
+            for symbol in universe_symbols:
+                data = market_provider.get_stock_data(symbol, period='2y', interval='1d')
+                if not data.empty:
+                    returns_data[symbol] = data['Close'].pct_change().dropna()
+            
+            if len(returns_data) >= 2:
+                # Align all return series
+                returns_df = pd.DataFrame(returns_data).dropna()
+                
+                if st.button("🚀 Run Quantum Optimization"):
+                    with st.spinner("Running quantum-inspired optimization..."):
+                        results = quantum_optimizer.quantum_portfolio_optimization(
+                            returns_df, risk_tolerance, quantum_iterations
+                        )
+                    
+                    if 'error' not in results:
+                        # Display optimization results
+                        st.subheader("📊 Optimization Results")
+                        
+                        # Metrics
+                        metric_cols = st.columns(4)
+                        with metric_cols[0]:
+                            st.metric("Expected Return", f"{results['expected_return']:.1%}")
+                        with metric_cols[1]:
+                            st.metric("Expected Risk", f"{results['expected_risk']:.1%}")
+                        with metric_cols[2]:
+                            st.metric("Sharpe Ratio", f"{results['sharpe_ratio']:.2f}")
+                        with metric_cols[3]:
+                            st.metric("Utility Score", f"{results['utility_score']:.3f}")
+                        
+                        # Portfolio weights
+                        weights_df = pd.DataFrame({
+                            'Asset': results['assets'],
+                            'Weight': results['optimal_weights'],
+                            'Weight_Pct': [w * 100 for w in results['optimal_weights']]
+                        })
+                        
+                        # Portfolio allocation pie chart
+                        fig_pie = px.pie(weights_df, values='Weight_Pct', names='Asset',
+                                        title="Quantum-Optimized Portfolio Allocation")
+                        st.plotly_chart(fig_pie, use_container_width=True)
+                        
+                        # Weights bar chart
+                        fig_bar = px.bar(weights_df, x='Asset', y='Weight_Pct',
+                                        title="Portfolio Weights (%)",
+                                        color='Weight_Pct', color_continuous_scale='viridis')
+                        st.plotly_chart(fig_bar, use_container_width=True)
+                        
+                        # Display weights table
+                        st.subheader("📋 Portfolio Weights")
+                        weights_display = weights_df.copy()
+                        weights_display['Weight_Pct'] = weights_display['Weight_Pct'].apply(lambda x: f"{x:.1f}%")
+                        st.dataframe(weights_display[['Asset', 'Weight_Pct']], use_container_width=True)
+        
+        with col2:
+            st.subheader("🔬 Quantum Algorithm Info")
+            
+            st.info("""
+            **Quantum-Inspired Optimization Features:**
+            
+            🌀 **Superposition**: Portfolio weights initialized in quantum superposition state
+            
+            ❄️ **Annealing**: Simulated quantum annealing with temperature cooling
+            
+            🎯 **Measurement**: Quantum state collapse to classical portfolio weights
+            
+            ⚡ **Entanglement**: Correlated weight updates across assets
+            
+            🔄 **Iteration**: Quantum state evolution over multiple cycles
+            """)
+            
+            # Risk tolerance explanation
+            st.subheader("🎚️ Risk Tolerance Guide")
+            
+            if risk_tolerance < 0.3:
+                st.write("🛡️ **Conservative**: Focus on risk minimization")
+            elif risk_tolerance < 0.7:
+                st.write("⚖️ **Balanced**: Equal weight to risk and return")
+            else:
+                st.write("🚀 **Aggressive**: Focus on return maximization")
+            
+            # Algorithm parameters
+            st.subheader("⚙️ Algorithm Parameters")
+            st.write(f"**Risk Tolerance:** {risk_tolerance:.1f}")
+            st.write(f"**Quantum Iterations:** {quantum_iterations:,}")
+            st.write(f"**Universe Size:** {len(universe_symbols)} assets")
+            st.write(f"**Data Period:** 2 years daily returns")
 
 if __name__ == "__main__":
     main()
