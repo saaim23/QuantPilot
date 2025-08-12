@@ -64,6 +64,7 @@ cd quantitative-finance-platform
 pip install -r requirements.txt
 ```
 
+
 3. Run the application:
 ```bash
 streamlit run app.py --server.port 5000
