@@ -1557,7 +1557,7 @@ wheels = [
 ]
 
 [[package]]
-name = "quantiative finance project"
+name = "quantitative finance project"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
