@@ -1,18 +1,32 @@
+# Core
 streamlit>=1.28.0
 numpy>=1.24.0
 pandas>=2.0.0
 scipy>=1.10.0
+
+# Finance/Data Sources
 yfinance>=0.2.18
 alpha-vantage>=2.3.1
+
+# Machine Learning
 scikit-learn>=1.3.0
 xgboost>=1.7.0
 joblib>=1.3.0
 arch>=6.2.0
+
+# NLP & Sentiment
 textblob>=0.17.1
+
+# Visualization
 plotly>=5.15.0
+
+# Web Scraping / Data Extraction
 trafilatura>=1.6.0
-# Optional (uncomment if needed)
+
+# Optional (Heavy Models)
 # tensorflow>=2.13.0
 # torch>=2.0.0
+
+# Misc / API Helpers
 # requests>=2.31.0
 # beautifulsoup4>=4.12.0
