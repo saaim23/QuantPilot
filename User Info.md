@@ -71,3 +71,4 @@ Preferred communication style: Simple, everyday language.
 - **In-Memory**: Pandas DataFrames for data manipulation and caching
 - **Model Persistence**: joblib for saving trained ML models
 - **Configuration**: JSON-based configuration for model parameters and settings
+
