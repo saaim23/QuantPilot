@@ -1,7 +1,7 @@
 [project]
-name = "repl-nix-workspace"
+name = "quantative-finance-platform"
 version = "0.1.0"
-description = "Add your description here"
+description = "Just made for a personal project might do something in future"
 requires-python = ">=3.11"
 dependencies = [
     "alpha-vantage>=3.0.0",
